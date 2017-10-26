@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="ko-KR">
+<head>
+<title>HTML5 Puzzle</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, user-scalable=no">
+<style>
+    html, body {
+        width:100% !important; 
+        height:100% !important; 
+        overflow:hidden
+    }
+    #canvas {
+        border : 1px solid black;   
+    }
+</style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<script src="./app.js"></script>
+<script>
+    init(document.getElementById('canvas'));
+    load("mke.jpg");
+</script>
+</body>
+</html>
