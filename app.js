@@ -40,13 +40,15 @@ function load(imgSrc) {
 
 // 이미지 로딩 완료
 function onImage(e){
-    _img.width = _screenWidth;
-    _img.height = _screenHeight;
+    //_img.width = _screenWidth;
+    //_img.height = _screenHeight;
 
-    _pieceWidth = Math.floor(_img.width / PUZZLE_DIFFICULTY)    // 조각 가로 길이
-    _pieceHeight = Math.floor(_img.height / PUZZLE_DIFFICULTY)  // 조각 세로 길이
+    _pieceWidth = Math.floor(_screenWidth / PUZZLE_DIFFICULTY)    // 조각 가로 길이
+    _pieceHeight = Math.floor(_screenHeight / PUZZLE_DIFFICULTY)  // 조각 세로 길이
     _puzzleWidth = _pieceWidth * PUZZLE_DIFFICULTY;             // 퍼즐 가로 길이
     _puzzleHeight = _pieceHeight * PUZZLE_DIFFICULTY;           // 퍼즐 세로 길이
+
+    console.log(_pieceWidth, 'x', _pieceHeight, ', ', _puzzleWidth, 'x', _puzzleHeight);
 
     initPuzzle();
 }
@@ -59,8 +61,15 @@ function initPuzzle(){
     _currentDropPiece = null;
 
     // 이미지 출력
-    //_stage.drawImage(_img, 0, 0, _puzzleWidth, _puzzleHeight, 0, 0, _puzzleWidth, _puzzleHeight);
-    _stage.drawImage(_img, 0, 0, _puzzleWidth, _puzzleHeight);
+    _stage.drawImage(_img,  0, 0, _img.width, _img.height,      // source rectangle
+                            0, 0, _puzzleWidth, _puzzleHeight); // destination rectangle  
+    //_stage.drawImage(_img, 0, 0, _puzzleWidth, _puzzleHeight);
+
+    _img.removeEventListener('load', onImage);
+    _img.src = _canvas.toDataURL();
+    //_img.width = _screenWidth;
+    //_img.height = _screenHeight;
+    //console.log(_img);
 
     createTitle("클릭하면 퍼즐을 시작합니다.");
 
@@ -77,17 +86,15 @@ function createTitle(msg){
     _stage.textAlign = "center";
     _stage.textBaseline = "middle";
     _stage.font = "20px Arial";
-    _stage.fillText(msg,_puzzleWidth / 2,_puzzleHeight - 20);
+    _stage.fillText(msg, _puzzleWidth / 2, _puzzleHeight - 20);
 }
 
 // 퍼즐 조각내기
 function buildPieces(){
-    var i;
-    var piece;
+    var piece = {};
     var xPos = 0;
     var yPos = 0;
-    for(i = 0;i < PUZZLE_DIFFICULTY * PUZZLE_DIFFICULTY;i++){
-        piece = {};
+    for(var i = 0; i < PUZZLE_DIFFICULTY * PUZZLE_DIFFICULTY; i++){
         piece.sx = xPos;
         piece.sy = yPos;
         _pieces.push(piece);
@@ -98,17 +105,20 @@ function buildPieces(){
         }
     }
     
-    document.onmousedown = shufflePuzzle;
+    //document.onmousedown = shufflePuzzle;
+    _canvas.addEventListener("click", shufflePuzzle, false);
+    //_canvas.addEventListener("touchend", shufflePuzzle, false);
 }
 
+// 퍼즐 섞기
 function shufflePuzzle(){
     _pieces = shuffleArray(_pieces);
-    _stage.clearRect(0,0,_puzzleWidth,_puzzleHeight);
+    _stage.clearRect(0, 0, _puzzleWidth, _puzzleHeight);
     var i;
     var piece;
     var xPos = 0;
     var yPos = 0;
-    for(i = 0;i < _pieces.length;i++){
+    for(i = 0; i < _pieces.length; i++){
         piece = _pieces[i];
         piece.xPos = xPos;
         piece.yPos = yPos;
@@ -121,7 +131,10 @@ function shufflePuzzle(){
         }
     }
     document.onmousedown = onPuzzleClick;
+    //_canvas.addEventListener("click", onPuzzleClick, false);
 }
+
+// 퍼즐 터치
 function onPuzzleClick(e){
     if(e.layerX || e.layerX == 0){
         _mouse.x = e.layerX - _canvas.offsetLeft;
@@ -142,6 +155,7 @@ function onPuzzleClick(e){
         document.onmouseup = pieceDropped;
     }
 }
+
 function checkPieceClicked(){
     var i;
     var piece;
@@ -231,6 +245,7 @@ function gameOver(){
     document.onmouseup = null;
     initPuzzle();
 }
+
 function shuffleArray(o){
     for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
     return o;
