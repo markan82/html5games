@@ -2,29 +2,124 @@
 <html lang="ko-KR">
 <head>
 <title>HTML5 Puzzle</title>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, user-scalable=no">
+<meta charset="utf-8"/>
+<meta name="viewport" content="user-scalable=no, initial-scale=1, maximum-scale=1, minimum-scale=1, width=device-width" />
+<meta name="format-detection" content="telephone=no">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<link rel="manifest" href="/manifest.json">
+<link rel="apple-touch-icon-precomposed" sizes="57x57" href="icons/icon57.png">
+<link rel="apple-touch-icon-precomposed" sizes="72x72" href="icons/icon72.png">
+<link rel="apple-touch-icon-precomposed" sizes="114x114" href="icons/icon114.png">
+<link rel="apple-touch-icon-precomposed" sizes="144x144" href="icons/icon144.png">
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="icon" href="favicon.ico" type="image/x-icon">
 <style>
     html, body {
         padding:0;
         margin:0;
         width:100% !important; 
         height:100% !important; 
-        overflow:hidden
+        overflow:hidden;
+        -webkit-text-size-adjust: 100%;
+        -moz-text-size-adjust: 100%;
+        -ms-text-size-adjust: 100%;
     }
     #canvas {
-        border : 1px solid black;   
+        border : 1px solid black; 
+        /*width:100%;
+        height:100%;*/
+        width:100vmax; 
+        height:100vmin;
     }
+    
+    /*
+    @media screen and (orientation: portrait) { 
+     #canvas { 
+       width:100vmax; 
+       height:100vmin;
+       /* Chrome, Safari, Opera */
+       -webkit-transform-origin: calc(100vmin / 2) calc(100vmin / 2) ;
+       -webkit-transform: rotate(90deg) /*translate(-23vmax, -23vmin)*/; 
+       -moz-transform: rotate(90deg); 
+       -o-transform: rotate(90deg); 
+       -ms-transform: rotate(90deg); 
+       transform: rotate(90deg) translate(-100, 0); 
+      }
+    }
+    */
+    
+    /*
+    @media screen and (min-width: 320px) and (max-width: 767px) and (orientation: landscape) { 
+      html { transform: rotate(-90deg); transform-origin: left top; width: 100vh; overflow-x: hidden; position: absolute; top: 100%; left: 0; }
+    }*/  
+    
+    
+  :-webkit-full-screen #goFS{
+    display: none;
+  }
+  #goFS:-moz-full-screen {
+    display: none;
+  }
+  #goFS:-ms-fullscreen {
+    display: none;
+  }
+  #goFS:fullscreen {
+    display: none;
+  }
+    
 </style>
 </head>
 <body>
+<button id="goFS" onclick="startFS(document.body)">Fullscreen</button>
 <canvas id="canvas"></canvas>
 
+<script src="https://code.jquery.com/jquery-2.2.4.min.js"   integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="   crossorigin="anonymous"></script>
 <script src="./vconsole.min.js"></script>
 <script src="./app.js"></script>
 <script>
-    init(document.getElementById('canvas'));
-    load("mke.jpg");
+    function start() {
+      console.log('start');
+      init(document.getElementById('canvas'));
+      load("mke.jpg");
+    }
+    
+    
+    //screen.addEventListener("orientationchange", function () { console.log("The orientation of the screen is: " + screen.orientation); });
+    
+    /*
+    window.onorientationchange = function() {
+      console.log('onorientationchange',window.orientation);
+     		//if( window.orientation == 90 || window.orientation == -90){
+     		    //setTimeout(start(), 2000);
+     		//} else {
+     		   
+     		//}
+    }*/
+    
+    //if( window.orientation == 90 || window.orientation == -90){
+     		    start();
+    //}
+    
+    
+    console.log('fullscreenElement: ',document.getElementById('canvas').webkitRequestFullScreen);
+    startFS(document.getElementById('canvas'));
+    
+  // 원하는 DOM객체를 인자로 받는다.
+function startFS(element) {
+ console.log('startFS: ', element.webkitRequestFullScreen);
+		if(element.requestFullScreen) {
+			element.requestFullScreen();
+		} else if(element.webkitRequestFullScreen ) {
+			element.webkitRequestFullScreen();
+		} else if(element.mozRequestFullScreen) {
+			element.mozRequestFullScreen();
+		} else if (element.msRequestFullscreen) {
+			element.msRequestFullscreen(); // IE
+		}
+}
+
 </script>
 </body>
 </html>

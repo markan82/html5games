@@ -136,8 +136,11 @@ function shufflePuzzle(){
 
 // 퍼즐 터치시 발생
 function onPuzzleTouch(e){
-    var touches = e.changedTouches;
-    console.log('touchstart: ', touches);
+    var touches = e.touches[0] || e.changedTouches[0];
+    if(touches){
+      e.layerX = touches.pageX;
+      e.layerY = touches.pageY;
+    }
 
     if(e.layerX || e.layerX == 0){
         _mouse.x = e.layerX - _canvas.offsetLeft;
@@ -147,7 +150,8 @@ function onPuzzleTouch(e){
         _mouse.x = e.offsetX - _canvas.offsetLeft;
         _mouse.y = e.offsetY - _canvas.offsetTop;
     }
-    _currentPiece = checkPieceClicked();
+    
+    _currentPiece = checkTouchexPiece();
     if(_currentPiece != null){
         _stage.clearRect(_currentPiece.xPos,_currentPiece.yPos,_pieceWidth,_pieceHeight);
         _stage.save();
@@ -160,10 +164,10 @@ function onPuzzleTouch(e){
         _canvas.addEventListener("touchend", pieceDropped, false);
     }
 }
-function checkPieceClicked(){
-    var i;
+
+function checkTouchexPiece(){
     var piece;
-    for(i = 0;i < _pieces.length;i++){
+    for(var i = 0; i < _pieces.length; i++){
         piece = _pieces[i];
         if(_mouse.x < piece.xPos || _mouse.x > (piece.xPos + _pieceWidth) || _mouse.y < piece.yPos || _mouse.y > (piece.yPos + _pieceHeight)){
             //PIECE NOT HIT
@@ -177,8 +181,11 @@ function checkPieceClicked(){
 
 // 퍼즐 업데이트
 function updatePuzzle(e){
-    var touches = e.changedTouches;
-    console.log('touchmove: ', touches);
+    var touches = e.touches[0] || e.changedTouches[0];
+    if(touches){
+      e.layerX = touches.pageX;
+      e.layerY = touches.pageY;
+    }
 
     _currentDropPiece = null;
     if(e.layerX || e.layerX == 0){
@@ -222,13 +229,16 @@ function updatePuzzle(e){
 
 // 퍼즐 놓기
 function pieceDropped(e){
-    var touches = e.changedTouches;
-    console.log('touchend: ', touches);
-
+    var touches = e.touches[0] || e.changedTouches[0];
+    if(touches){
+      e.layerX = touches.pageX;
+      e.layerY = touches.pageY;
+    }
+    
     //document.onmousemove = null;
     //document.onmouseup = null;
-    _canvas.removeEventListener("touchmove", updatePuzzle, false);
-    _canvas.removeEventListener("touchend", pieceDropped, false);
+    _canvas.removeEventListener("touchmove", updatePuzzle);
+    _canvas.removeEventListener("touchend", pieceDropped);
     if(_currentDropPiece != null){
         var tmp = {xPos:_currentPiece.xPos,yPos:_currentPiece.yPos};
         _currentPiece.xPos = _currentDropPiece.xPos;
@@ -236,6 +246,7 @@ function pieceDropped(e){
         _currentDropPiece.xPos = tmp.xPos;
         _currentDropPiece.yPos = tmp.yPos;
     }
+    
     resetPuzzleAndCheckWin();
 }
 
