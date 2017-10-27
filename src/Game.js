@@ -24,13 +24,18 @@ class Game extends Component {
     _stage;
     _canvas;
     
-    _mouse;
+    // 사용자 터치 위치 저장
+    /*_currentPoint = {
+        x:0, 
+        y:0
+    };*/
     
     _pieces;
-    _puzzleWidth;
-    _puzzleHeight;
     _pieceWidth;
     _pieceHeight;
+
+    _puzzleWidth;
+    _puzzleHeight;
     _currentPiece;
     _currentDropPiece;  
 
@@ -84,12 +89,12 @@ class Game extends Component {
     // 퍼즐 초기화
     _initPuzzle = () => {
         this._pieces = [];
-        this._mouse = {x:0, y:0};
+        this._pointer = {x:0, y:0};
         this._currentPiece = null;
         this._currentDropPiece = null;
 
         // 화면에 표시
-        this._createTitle("클릭하면 퍼즐을 시작합니다.");
+        //this._createTitle("클릭하면 퍼즐을 시작합니다.");
 
         this._buildPieces();
     }
@@ -124,65 +129,75 @@ class Game extends Component {
             }
         }
         
-        this._canvas.addEventListener("click", this._shufflePuzzle, false); // 클릭하면 퍼즐 시작
+        //this._canvas.addEventListener("click", this._startPuzzleGame, false); // 클릭하면 퍼즐 시작
+        this._startPuzzleGame();
     }
 
-    // 퍼즐 섞기
-    shufflePuzzle = () => {
+    // 퍼즐 시작(조각 섞기)
+    _startPuzzleGame = () => {
         this._pieces = this._shuffleArray(this._pieces);
         this._stage.clearRect(0, 0,  this._puzzleWidth,  this._puzzleHeight);
+
+        this._stage.strokeStyle = "#F0F0F0";
+        this._stage.lineWidth = 0.1;
 
         var piece;
         var xPos = 0;
         var yPos = 0;
         for(var i = 0; i <  this._pieces.length; i++){
+            //퍼즐 조각 데이터 저장
             piece =  this._pieces[i];
             piece.xPos = xPos;
             piece.yPos = yPos;
-            this._stage.drawImage( this._img, piece.sx, piece.sy,  this._pieceWidth,  this._pieceHeight, xPos, yPos,  this._pieceWidth,  this._pieceHeight);
-            this._stage.strokeRect(xPos, yPos,  this._pieceWidth,  this._pieceHeight);
-            xPos +=  this._pieceWidth;
+
+            //퍼즐 조각 이미지 그리기
+            this._stage.drawImage(this._img, piece.sx, piece.sy, this._pieceWidth,  this._pieceHeight, xPos, yPos, this._pieceWidth,  this._pieceHeight);
+            this._stage.strokeRect(xPos, yPos, this._pieceWidth, this._pieceHeight);
+
+            // 다음 퍼즐 조각 위치 계산
+            xPos += this._pieceWidth;
             if(xPos >=  this._puzzleWidth){
                 xPos = 0;
                 yPos +=  this._pieceHeight;
             }
         }
 
-        this._canvas.removeEventListener("click", this._shufflePuzzle); //퍼즐 시작 이벤트 해제
-        this._canvas.addEventListener("touchstart", this._onPuzzleTouchStart, false);   //퍼즐조각 터치 시작
+        //this._canvas.removeEventListener("click", this._startPuzzleGame);            //퍼즐 시작 이벤트 해제
+
+        this._canvas.addEventListener("mousedown", this._onPuzzleTouchStart, false);   //퍼즐조각 터치 시작
+        this._canvas.addEventListener("touchstart", this._onPuzzleTouchStart, false);  //퍼즐조각 터치 시작
     }
 
     // 퍼즐 터치시 발생
     _onPuzzleTouchStart = (event) => {
-        var touches = event.touches[0] || event.changedTouches[0];
+        var touches = event.touches ? event.touches[0] : event.changedTouches ? event.changedTouches[0] : null;
         if( touches ){
             event.layerX = touches.pageX;
             event.layerY = touches.pageY;
         }
-
-        console.log('[_onPuzzleTouchStart] ', 'event.layerX: ' + event.layerX, ', event.offsetX: ' + event.offsetX)
+        //console.log('[_onPuzzleTouchStart] ', 'event.layerX: ' + event.layerX, ', event.offsetX: ' + event.offsetX)
 
         if(event.layerX || event.layerX === 0){
-            this._mouse.x = event.layerX - this._canvas.offsetLeft;
-            this._mouse.y = event.layerY - this._canvas.offsetTop;
+            this._currentPoint.x = event.layerX - this._canvas.offsetLeft;
+            this._currentPoint.y = event.layerY - this._canvas.offsetTop;
         }
         else if(event.offsetX || event.offsetX === 0){
-            this._mouse.x = event.offsetX - this._canvas.offsetLeft;
-            this._mouse.y = event.offsetY - this._canvas.offsetTop;
+            this._currentPoint.x = event.offsetX - this._canvas.offsetLeft;
+            this._currentPoint.y = event.offsetY - this._canvas.offsetTop;
         }
         
-        this._currentPiece = this._getCurrentPiece(this._mouse.x, this._mouse.y);
+        this._currentPiece = this._getCurrentPiece(this._currentPoint.x, this._currentPoint.y);
         if(this._currentPiece != null){
             this._stage.clearRect(this._currentPiece.xPos, this._currentPiece.yPos, this._pieceWidth, this._pieceHeight);
             this._stage.save();
-            this._stage.globalAlpha = .9;
-            this._stage.drawImage(this._img, this._currentPiece.sx, this._currentPiece.sy, this._pieceWidth, this._pieceHeight, this._mouse.x - (this._pieceWidth / 2), this._mouse.y - (this._pieceHeight / 2), this._pieceWidth, this._pieceHeight);
+            this._stage.globalAlpha = 0.9;
+            this._stage.drawImage(this._img, this._currentPiece.sx, this._currentPiece.sy, this._pieceWidth, this._pieceHeight, this._currentPoint.x - (this._pieceWidth / 2), this._currentPoint.y - (this._pieceHeight / 2), this._pieceWidth, this._pieceHeight);
             this._stage.restore();
 
-            this._canvas.addEventListener("mousemove", this._updatePuzzle, false);
-            this._canvas.addEventListener("mouseup", this._pieceDropped, false);
-            this._canvas.addEventListener("touchmove", this._updatePuzzle, false);
-            this._canvas.addEventListener("touchend", this._pieceDropped, false);
+            this._canvas.addEventListener("mousemove", this._onPuzzleTouchMove, false);
+            this._canvas.addEventListener("mouseup", this._onPuzzleTouchEnd, false);
+            this._canvas.addEventListener("touchmove", this._onPuzzleTouchMove, false);
+            this._canvas.addEventListener("touchend", this._onPuzzleTouchEnd, false);
         }
     }
 
@@ -204,23 +219,22 @@ class Game extends Component {
     }
 
     // 퍼즐 업데이트
-    updatePuzzle = (event) => {
-        var touches = event.touches[0] || event.changedTouches[0];
-        if(touches){
+    _onPuzzleTouchMove = (event) => {
+        var touches = event.touches ? event.touches[0] : event.changedTouches ? event.changedTouches[0] : null;
+        if( touches ){
             event.layerX = touches.pageX;
             event.layerY = touches.pageY;
         }
-
-        console.log('[updatePuzzle] ', 'event.layerX: ' + event.layerX, ', event.offsetX: ' + event.offsetX)
+        //console.log('[updatePuzzle] ', 'event.layerX: ' + event.layerX, ', event.offsetX: ' + event.offsetX)
 
         // 현재 포인터 위치 저장
         if(event.layerX || event.layerX === 0){
-            this._mouse.x = event.layerX - this._canvas.offsetLeft;
-            this._mouse.y = event.layerY - this._canvas.offsetTop;
+            this._currentPoint.x = event.layerX - this._canvas.offsetLeft;
+            this._currentPoint.y = event.layerY - this._canvas.offsetTop;
         }
         else if(event.offsetX || event.offsetX === 0){
-            this._mouse.x = event.offsetX - this._canvas.offsetLeft;
-            this._mouse.y = event.offsetY - this._canvas.offsetTop;
+            this._currentPoint.x = event.offsetX - this._canvas.offsetLeft;
+            this._currentPoint.y = event.offsetY - this._canvas.offsetTop;
         }
 
         this._currentDropPiece = null;
@@ -238,15 +252,15 @@ class Game extends Component {
             this._stage.strokeRect(piece.xPos, piece.yPos, this._pieceWidth, this._pieceHeight); //선그리기
 
             if( this._currentDropPiece == null ){
-                if(this._mouse.x < piece.xPos || this._mouse.x > (piece.xPos +  this._pieceWidth) || this._mouse.y < piece.yPos || this._mouse.y > (piece.yPos +  this._pieceHeight)){
+                if(this._currentPoint.x < piece.xPos || this._currentPoint.x > (piece.xPos +  this._pieceWidth) || this._currentPoint.y < piece.yPos || this._currentPoint.y > (piece.yPos +  this._pieceHeight)){
                     //NOT OVER
                 }
                 else{
                     this._currentDropPiece = piece;
                     this._stage.save();
                     this._stage.globalAlpha = 0.4;
-                    this._stage.fillStyle =  this._PUZZLE_HOVER_TINT;
-                    this._stage.fillRect(this._currentDropPiece.xPos,  this._currentDropPiece.yPos,  this._pieceWidth,  this._pieceHeight);
+                    this._stage.fillStyle =  this._PUZZLE_HOVER_TINT; //잡고있는 퍼즐을 놓을 위치 표시 색상
+                    this._stage.fillRect(this._currentDropPiece.xPos, this._currentDropPiece.yPos,  this._pieceWidth,  this._pieceHeight);
                     this._stage.restore();
                 }
             }
@@ -254,26 +268,17 @@ class Game extends Component {
         
         this._stage.save();
         this._stage.globalAlpha = 0.6;
-        this._stage.drawImage( this.img,  this._currentPiece.sx,  this._currentPiece.sy,  this._pieceWidth,  this._pieceHeight,  this._mouse.x - ( this._pieceWidth / 2),  this._mouse.y - ( this._pieceHeight / 2),  this._pieceWidth,  this._pieceHeight);
+        this._stage.drawImage(this._img,  this._currentPiece.sx,  this._currentPiece.sy,  this._pieceWidth,  this._pieceHeight,  this._currentPoint.x - ( this._pieceWidth / 2),  this._currentPoint.y - ( this._pieceHeight / 2),  this._pieceWidth,  this._pieceHeight);
         this._stage.restore();
-        this._stage.strokeRect(  this._mouse.x - ( this._pieceWidth / 2),  this._mouse.y - (this._pieceHeight / 2), this._pieceWidth, this._pieceHeight);
+        this._stage.strokeRect(this._currentPoint.x - (this._pieceWidth / 2), this._currentPoint.y - (this._pieceHeight / 2), this._pieceWidth, this._pieceHeight);
     }
 
     // 퍼즐 놓기
-    pieceDropped = (event) => {
-        /*
-        var touches = event.touches[0] || event.changedTouches[0];
-        if( touches ){
-            event.layerX = touches.pageX;
-            event.layerY = touches.pageY;
-        }
-        */
-        
-        this._canvas.removeEventListener("mousemove", this._updatePuzzle);
-        this._canvas.removeEventListener("mouseup", this._pieceDropped);
-
-        this._canvas.removeEventListener("touchmove", this._updatePuzzle);
-        this._canvas.removeEventListener("touchend", this._pieceDropped);
+    _onPuzzleTouchEnd = (event) => {        
+        this._canvas.removeEventListener("mousemove", this._onPuzzleTouchMove);
+        this._canvas.removeEventListener("mouseup", this._onPuzzleTouchEnd);
+        this._canvas.removeEventListener("touchmove", this._onPuzzleTouchMove);
+        this._canvas.removeEventListener("touchend", this._onPuzzleTouchEnd);
 
         if( this._currentDropPiece != null ){
             var tmp = {
@@ -313,13 +318,13 @@ class Game extends Component {
     // 게임 종료
     _gameOver = () => {
         // Web
-        this._canvas.removeEventListener("mousemove"  , this._updatePuzzle);
-        this._canvas.removeEventListener("mouseup"    , this._pieceDropped);
+        this._canvas.removeEventListener("mousemove"  , this._onPuzzleTouchMove);
+        this._canvas.removeEventListener("mouseup"    , this._onPuzzleTouchEnd);
         this._canvas.removeEventListener("mousedown"  , this._onPuzzleTouchStart);
 
         // Mobile
-        this._canvas.removeEventListener("touchmove"    , this._updatePuzzle);
-        this._canvas.removeEventListener("touchend"     , this._pieceDropped);
+        this._canvas.removeEventListener("touchmove"    , this._onPuzzleTouchMove);
+        this._canvas.removeEventListener("touchend"     , this._onPuzzleTouchEnd);
         this._canvas.removeEventListener("touchstart"   , this._onPuzzleTouchStart);
 
         // 초기화
@@ -328,7 +333,7 @@ class Game extends Component {
 
     // 퍼즐 순서 섞기
     _shuffleArray = (o) => {
-        for(var j, x, i = o.length; i; j = parseInt(Math.random() * i), x = o[--i], o[i] = o[j], o[j] = x);
+        for(var j, x, i = o.length; i; j = parseInt(Math.random() * i, 10), x = o[--i], o[i] = o[j], o[j] = x);
         return o;
     }
 }
