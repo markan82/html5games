@@ -49,6 +49,7 @@ class Game extends Component {
         this._stage = this._canvas.getContext('2d');
         this._canvas.width = this._screenWidth;
         this._canvas.height = this._screenHeight;
+        this._stage.clearRect(0, 0, this._canvas.width, this._canvas.height);        
     
         this._loadImage();
     }
@@ -90,7 +91,7 @@ class Game extends Component {
         this._currentDropPiece = null;
 
         // 화면에 표시
-        this._createTitle("클릭하면 퍼즐을 시작합니다.");
+        //this._createTitle("클릭하면 퍼즐을 시작합니다.");
 
         this._buildPieces();
     }
