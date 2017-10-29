@@ -7,13 +7,13 @@ import { Link } from 'react-router-dom'
 
 import './css/bootstrap.min.css';
 
-const App = () => (
+const App = (rootPath) => (
   <main>
     <Switch>
-      <Route exact path='/' component={Home}/>
-      <Route path='/selectImage' component={SelectImage}/>
-      <Route path='/about' component={About}/>
-      <Route path='/game' component={Game}/>
+      <Route exact path={rootPath + '/'} component={Home}/>
+      <Route path={rootPath + '/selectImage'} component={SelectImage}/>
+      <Route path={rootPath + '/about'} component={About}/>
+      <Route path={rootPath + '/game'} component={Game}/>
     </Switch>
   </main>
 )
@@ -47,8 +47,8 @@ const SelectImage = ({location}) => (
   <div className='select-image'>
     {imgs.map((e, index) => (
       <div className='image' key={index}>
-        <Link to={{ pathname: '/game', piece: location.piece, imgSrc: '/imgs/'+e }}>
-          <img src={'/imgs/'+e} className='img-thumbnail' alt='이미지' />
+        <Link to={{ pathname: '/game', piece: location.piece, imgSrc: 'imgs/'+e }}>
+          <img src={'imgs/'+e} className='img-thumbnail' alt='이미지' />
         </Link>
       </div>))}
   </div>
