@@ -47,8 +47,8 @@ const SelectImage = ({location}) => (
   <div className='select-image'>
     {imgs.map((e, index) => (
       <div className='image' key={index}>
-        <Link to={{ pathname: '/game', piece: location.piece, image: '/imgs/'+e }}>
-          <img src={'/imgs/'+e} className='img-thumbnail' />
+        <Link to={{ pathname: '/game', piece: location.piece, imgSrc: '/imgs/'+e }}>
+          <img src={'/imgs/'+e} className='img-thumbnail' alt='이미지' />
         </Link>
       </div>))}
   </div>
@@ -72,6 +72,7 @@ class SelectImage extends Component {
 }
 */
 
+/*
 const Header = () => (
   <header>
     <nav>
@@ -82,6 +83,7 @@ const Header = () => (
     </nav>
   </header>
 )
+*/
 
 /*
 class App extends Component {

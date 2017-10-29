@@ -11,10 +11,16 @@ class Game extends Component {
        this._init();
     }  
 
+    componentDidUpdate() {
+        this._init();
+    }
+
     render() {
-        console.log(this.props);
+        console.log(this.props.location);
+        //console.log(this.props.match.params);
+        //console.log(this.props.history.location);
         return (
-            <canvas id='canvas' />
+            <canvas ref="canvas" />
         )
     }
 
@@ -42,15 +48,17 @@ class Game extends Component {
         this._screenWidth = document.body.offsetWidth;
         this._screenHeight = document.body.offsetHeight;
 
-        this._PUZZLE_DIFFICULTY = this.props.location.piece;
+        if(this.props.location.piece)
+            this._PUZZLE_DIFFICULTY = this.props.location.piece;
     
         // 캔버스 셋팅
-        this._canvas = document.getElementById('canvas');
+        this._canvas = this.refs.canvas;
         this._stage = this._canvas.getContext('2d');
         this._canvas.width = this._screenWidth;
         this._canvas.height = this._screenHeight;
         this._stage.clearRect(0, 0, this._canvas.width, this._canvas.height);        
-    
+        //console.log(this._canvas);
+
         this._loadImage();
     }
 
@@ -58,7 +66,7 @@ class Game extends Component {
     _loadImage = () => {
         this._img = new Image();
         this._img.addEventListener('load', this._onImage, false);
-        this._img.src = this.props.location.image;
+        this._img.src = this.props.location.imgSrc;
         console.log('image: '+this._img.src);
     }
 
@@ -77,8 +85,8 @@ class Game extends Component {
         this._stage.drawImage(this._img, 0, 0, this._puzzleWidth, this._puzzleHeight);
 
         // 이미지 크기 조정
-        this._img.src = this._canvas.toDataURL(); 
         this._img.removeEventListener('load', this._onImage);
+        this._img.src = this._canvas.toDataURL(); 
 
         this._initPuzzle();
     }
