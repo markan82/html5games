@@ -38,12 +38,16 @@ class Game extends Component {
        this._init();
     }  
 
+    componentDidUpdate() {
+        this._init();
+    }
+
     render() {
         console.log(this.state);
         return (
             <div className="GamePanel">
                 <Notifications options={{zIndex: 5000}} />
-                <canvas id='canvas' />
+                <canvas ref="canvas" />
                 <div className="GameStartPanel" style={{display : (this.state.gameState==='stop')?"":"none"}}>
                     <button onClick={this._onGameStartClick}>게임 시작</button>
                 </div>
@@ -80,14 +84,17 @@ class Game extends Component {
         this._screenWidth = document.body.offsetWidth;
         this._screenHeight = document.body.offsetHeight;
 
-        this._PUZZLE_DIFFICULTY = this.props.puzzleDifficulty;
+        if(this.props.location.piece)
+            this._PUZZLE_DIFFICULTY = this.props.location.piece;
     
         // 캔버스 셋팅
-        this._canvas = document.getElementById('canvas');
+        this._canvas = this.refs.canvas;
         this._stage = this._canvas.getContext('2d');
         this._canvas.width = this._screenWidth;
         this._canvas.height = this._screenHeight;
-    
+        this._stage.clearRect(0, 0, this._canvas.width, this._canvas.height);        
+        //console.log(this._canvas);
+
         this._loadImage();
     }
 
@@ -95,7 +102,8 @@ class Game extends Component {
     _loadImage = () => {
         this._img = new Image();
         this._img.addEventListener('load', this._onImage, false);
-        this._img.src = this.props.imageUrl;
+        this._img.src = this.props.location.imgSrc;
+        console.log('image: '+this._img.src);
     }
 
     // 이미지 로딩 완료
@@ -113,8 +121,8 @@ class Game extends Component {
         this._stage.drawImage(this._img, 0, 0, this._puzzleWidth, this._puzzleHeight);
 
         // 이미지 크기 조정
-        this._img.src = this._canvas.toDataURL(); 
         this._img.removeEventListener('load', this._onImage);
+        this._img.src = this._canvas.toDataURL(); 
 
         this._initPuzzle();
     }
@@ -300,7 +308,7 @@ class Game extends Component {
         
         this._stage.save();
         this._stage.globalAlpha = 0.6;
-        this._stage.drawImage(this._img,  this._currentPiece.sx,  this._currentPiece.sy,  this._pieceWidth,  this._pieceHeight, event.puzzleX - ( this._pieceWidth / 2), event.puzzleY - ( this._pieceHeight / 2),  this._pieceWidth,  this._pieceHeight);
+        this._stage.drawImage(this._img, this._currentPiece.sx, this._currentPiece.sy, this._pieceWidth, this._pieceHeight, event.puzzleX - ( this._pieceWidth / 2), event.puzzleY - ( this._pieceHeight / 2),  this._pieceWidth,  this._pieceHeight);
         this._stage.restore();
         this._stage.strokeRect(event.puzzleX - (this._pieceWidth / 2), event.puzzleY - (this._pieceHeight / 2), this._pieceWidth, this._pieceHeight);
     }
